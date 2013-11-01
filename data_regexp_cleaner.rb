@@ -5,9 +5,8 @@ class DataRegExpCleaner
   DATA_DIRECTORY = "data"
   @@all_fields = Hash.new{ |hash,key| hash[key] = [] }
 
-  def initialize
+  def initialize( *args )
      puts " initialize class #{self.class}"
-     self.class.module_eval( "def #{self.class}.get=(id) yield end" )
   end
 
    
@@ -37,10 +36,12 @@ class DataRegExpCleaner
   
   def self.get ( id )
     puts  "Find the objet with id: #{id}"
-    data = find_in_file ( id )
+    row = find_in_file ( id )
+    instance = self.new( self.parse_instance ( row ) )
   end
 
 
+  private
   def clean_fields( fields )
     fields.each do |field_name|
       send("#{field_name}#{CLEANER_METHOD_SUFFIX}", send("#{field_name}"))
@@ -48,7 +49,7 @@ class DataRegExpCleaner
   end
 
   def save_in_file
-    file_name = "#{DATA_DIRECTORY}/#{self.class.name}.csv" 
+    file_name = "#{DATA_DIRECTORY}/#{self.class.name}.csv"
     data = extract_data 
     if !self.class.get ( data.first )
       CSV.open( file_name , "a") do |csv|
@@ -68,32 +69,31 @@ class DataRegExpCleaner
   end
 
   def self.find_in_file ( id )
-    instance = nil
-    file_name = "#{DATA_DIRECTORY}/#{self.to_s}.csv" 
-
-    if File.exist?(file_name) 
-        CSV.foreach( file_name , "r") do |row|
+    file_name = "#{DATA_DIRECTORY}/#{self.to_s}.csv"
+    if File.exist?( file_name ) 
+        CSV.foreach( file_name , "r" ) do |row|
           if (row.first == id.to_s )
-            instance = self.parse_instance ( row )
+            return row
           end
       end
     end
-    instance
+    return nil
   end
 
   def self.parse_instance ( data )
-    instance = self.new
+    instance_info = {}
     fields = @@all_fields[:"#{self.to_s}"]
     
     fields.each_with_index do |field_name, index|
-      # puts " Asignee in a instance of #{instance}, field : #{field_name} =>  #{data[index]} "
-      instance.send( "#{field_name}=", data[index])  
-    end
-    instance
+      instance_info[field_name] = data[index]
+    end   
+    instance_info
   end
+
 
   def update_in_file 
   end
+
 
 end
 
