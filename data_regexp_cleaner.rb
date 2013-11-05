@@ -71,10 +71,11 @@ class DataRegExpCleaner
   def self.find_in_file( id )
     file_name = "#{DATA_DIRECTORY}/#{self.to_s}.csv"
     instance = nil
+
     if File.exist?( file_name )
-      CSV.open( file_name , "r" ) do |row|
-        if (row.first.to_s == id.to_s )
-            instance = self.new( self.parse_instance( row ) )
+      CSV.foreach( file_name , "r" ) do |row|
+        if (row.first == id.to_s )
+            return instance = self.new( self.parse_instance( row ) )
         end
       end
     end
@@ -84,8 +85,8 @@ class DataRegExpCleaner
   def save_in_file
     file_name = "#{DATA_DIRECTORY}/#{self.class.name}.csv"
     data = extract_data 
-    if !self.class.get( data.first )
-      CSV.open( file_name , "w") do |csv|
+    if !self.class.get( data.first ) 
+      CSV.open( file_name , "a") do |csv|
         csv << data 
       end
       puts " #{self}  ...saved "
@@ -123,9 +124,5 @@ class DataRegExpCleaner
     end
   end
 
-
 end
-
-
-
 
