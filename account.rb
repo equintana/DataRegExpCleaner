@@ -10,7 +10,7 @@ class Account < DataRegExpCleaner
   
 end
 
-a = Account.new
+a = Account.new({})
 a.name = "Mr MooCow 34"
 a.address = "212 Main St."
 a.balance = 3_000_000
